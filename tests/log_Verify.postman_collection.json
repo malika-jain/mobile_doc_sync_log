@@ -1,0 +1,122 @@
+{
+	"info": {
+		"_postman_id": "684122ac-a88a-49ad-abcb-dc61e41117fb",
+		"name": "log_Verify",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Log_catcher ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "8509e6fd-1b34-41a4-8c62-f394f9f27ee7",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"          var jsonData = JSON.parse(responseBody);",
+							"          var buckets = jsonData.aggregations.api_wise.buckets;",
+							"           var allDataCount = buckets.length ;",
+							"           var totalDocHitsCount = 0;",
+							"           for (i= 0 ;i<allDataCount; i++ ) {",
+							"               var innerBuckets = jsonData.aggregations.api_wise.buckets[i];",
+							"               var bucketWiseCount = innerBuckets.status_code_wise.buckets.length;",
+							"               for (j= 0 ;j<bucketWiseCount; j++ ) {",
+							"                   var apiName = innerBuckets.status_code_wise.buckets[j].key ;",
+							"                    if (innerBuckets.status_code_wise.buckets[j].key == \"/api/fetch_transform_doc_content/\" || innerBuckets.status_code_wise.buckets[j].key == \"/api/fetch_docs_meta_data/\" ||innerBuckets.status_code_wise.buckets[j].key == \"/api/fetch_doc_static_zip/\"){",
+							"                    var doc_count = innerBuckets.status_code_wise.buckets[j].doc_count ;",
+							"                   // totalDocHitsCount += doc_count; ",
+							"                   console.log (\"@@@@@@@@@@@@@@@@@@ #########\" + innerBuckets.status_code_wise.buckets[j].key);",
+							"                      if (innerBuckets.key != \"200\" ){ ",
+							"                         pm.test(\"Error\" +innerBuckets.key +  \"||   API - \" + apiName + \"   || FAILED CALLS -  \" +doc_count + \"   ||  \", function () {",
+							"    pm.expect(innerBuckets.key ).to.be.oneOf(\"200\");",
+							"});",
+							"                     }",
+							"                    //console.log(\"Count Hits for: \"+innerBuckets.key,doc_count);",
+							"                   // console.log(\"totalDocHitsCount: \"+totalDocHitsCount);",
+							"                     // When Status Code is 200",
+							"                    ",
+							"               }",
+							"           ",
+							"               ",
+							"             }",
+							"            // console.log(\"Success COunt Hits444444 --\"+doc_count);",
+							"                        // console.log(\"Success COunt Hits --\"+ apiName);",
+							"                     }",
+							"           //console.log(\"Total API Count - : \"+totalDocHitsCount);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "@p!M0n!nt0r!ng@S3nt!3o",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "watcher",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Host",
+						"value": "logwatcher.sentieo.com",
+						"type": "text"
+					},
+					{
+						"key": "Origin",
+						"value": "https://logwatcher.sentieo.com",
+						"type": "text"
+					},
+					{
+						"key": "Referer",
+						"value": "https://logwatcher.sentieo.com/app/kibana",
+						"type": "text"
+					},
+					{
+						"key": "kbn-xsrf",
+						"value": "reporting",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"query\": {\n    \"bool\": {\n      \"filter\": {\n        \"bool\": {\n          \"must\": [\n            {\n              \"range\": {\n                \"timestamp_ms\": {\n                  \"gte\": \"now-45m\",\n                  \"lte\": \"now\"\n                }\n              }\n            }\n          ],\n          \"should\": [\n            {\n              \"term\": {\n                \"usid\": \"\"\n              }\n            },\n            {\n              \"term\": {\n                \"uid\": \"5e327ed97a782c2a13042c3f\"\n              }\n            }\n          ]\n        }\n      }\n    }\n  },\n  \"aggs\": {\n    \"api_wise\": {\n      \"terms\": {\n        \"field\": \"status_code\",\n        \"size\": 20\n      },\n      \"aggs\": {\n        \"status_code_wise\": {\n          \"terms\": {\n            \"field\": \"path.keyword\",\n            \"size\": 50\n          }\n        }\n      }\n    }\n  },\n  \"size\": 0\n}"
+				},
+				"url": {
+					"raw": "https://logwatcher.sentieo.com/api/console/proxy?uri=/api--*/_search",
+					"protocol": "https",
+					"host": [
+						"logwatcher",
+						"sentieo",
+						"com"
+					],
+					"path": [
+						"api",
+						"console",
+						"proxy"
+					],
+					"query": [
+						{
+							"key": "uri",
+							"value": "/api--*/_search"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
